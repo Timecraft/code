@@ -775,6 +775,15 @@ namespace Scratch {
             text_files_filter.set_filter_name (_("Text files"));
             text_files_filter.add_mime_type ("text/*");
 
+            var cur_doc = get_current_document ();
+            string? filechooser_path = null;
+
+            if (cur_doc != null) {
+                filechooser_path = Path.get_dirname (cur_doc.get_uri ());
+            }
+
+            Utils.set_filechooser_path (filechooser_path);
+
             var file_chooser = new Gtk.FileChooserNative (
                 _("Open some files"),
                 this,
@@ -782,10 +791,10 @@ namespace Scratch {
                 _("Open"),
                 _("Cancel")
             );
+
             file_chooser.add_filter (text_files_filter);
             file_chooser.add_filter (all_files_filter);
             file_chooser.select_multiple = true;
-            file_chooser.set_current_folder_uri (Utils.last_path ?? GLib.Environment.get_home_dir ());
 
             var response = file_chooser.run ();
             file_chooser.destroy (); // Close now so it does not stay open during lengthy or failed loading
@@ -793,7 +802,7 @@ namespace Scratch {
             if (response == Gtk.ResponseType.ACCEPT) {
                 foreach (string uri in file_chooser.get_uris ()) {
                     // Update last visited path
-                    Utils.last_path = Path.get_dirname (uri);
+                    Utils.set_filechooser_path (Path.get_dirname (uri));
                     // Open the file
                     var file = File.new_for_uri (uri);
                     var doc = new Scratch.Services.Document (actions, file);
@@ -803,6 +812,8 @@ namespace Scratch {
         }
 
         private void action_open_folder () {
+            Utils.set_filechooser_path (null);
+
             var chooser = new Gtk.FileChooserNative (
                 "Select a folder.", this, Gtk.FileChooserAction.SELECT_FOLDER,
                 _("_Open"),
@@ -812,13 +823,17 @@ namespace Scratch {
             chooser.select_multiple = true;
 
             if (chooser.run () == Gtk.ResponseType.ACCEPT) {
-                chooser.get_files ().foreach ((glib_file) => {
+                var chooserfiles = chooser.get_files ();
+                chooser.destroy ();
+                chooserfiles.foreach ((glib_file) => {
                     var foldermanager_file = new FolderManager.File (glib_file.get_path ());
                     folder_manager_view.open_folder (foldermanager_file);
                 });
+
+                Utils.set_filechooser_path (chooserfiles.last ().data.get_path ());
             }
 
-            chooser.destroy ();
+
         }
 
         private void action_collapse_all_folders () {

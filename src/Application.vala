@@ -25,6 +25,7 @@ namespace Scratch {
     public Settings settings;
     public ServicesSettings services;
     public GLib.Settings privacy_settings;
+    public GLib.Settings? filechooser_settings = null;
 
     public class Application : Gtk.Application {
         public string app_cmd_name { get { return _app_cmd_name; } }
@@ -59,6 +60,8 @@ namespace Scratch {
             settings = new Settings ();
             services = new ServicesSettings ();
             privacy_settings = new GLib.Settings ("org.gnome.desktop.privacy");
+            /* For now, assume running on elementary with Files installed. Do we need to check? */
+            filechooser_settings = new GLib.Settings ("io.elementary.files.file-chooser");
 
             // Init data home folder for unsaved text files
             _data_home_folder_unsaved = Path.build_filename (Environment.get_user_data_dir (), Constants.PROJECT_NAME, "unsaved");

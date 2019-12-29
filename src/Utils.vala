@@ -25,4 +25,16 @@ namespace Scratch.Utils {
     public SimpleAction action_from_group (string action_name, SimpleActionGroup action_group) {
         return ((SimpleAction) action_group.lookup_action (action_name));
     }
+
+    public void set_filechooser_path (string? path) {
+        string last_chooser_path;
+        if (path != null) {
+            last_chooser_path = path;
+            last_path = path;
+        } else {
+            last_chooser_path = last_path ?? GLib.Environment.get_home_dir ();
+        }
+
+        filechooser_settings.set_string ("last-folder-uri", last_chooser_path);
+    }
 }

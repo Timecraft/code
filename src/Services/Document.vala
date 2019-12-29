@@ -506,6 +506,8 @@ namespace Scratch.Services {
             text_files_filter.set_filter_name (_("Text files"));
             text_files_filter.add_mime_type ("text/*");
 
+            Utils.set_filechooser_path (null);
+
             var file_chooser = new Gtk.FileChooserNative (
                 _("Save File"),
                 null,
@@ -516,7 +518,6 @@ namespace Scratch.Services {
             file_chooser.add_filter (all_files_filter);
             file_chooser.add_filter (text_files_filter);
             file_chooser.do_overwrite_confirmation = true;
-            file_chooser.set_current_folder_uri (Utils.last_path ?? GLib.Environment.get_home_dir ());
 
             var success = false;
             var current_file = file.get_path ();
